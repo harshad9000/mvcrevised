@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Product </title>
+</head>
+<body>
+	<?php require 'view/html/header.phtml'; ?>
+	<table class="btn-group btn-group-toggle">
+		<tr>
+			<th>Manage Product</th>
+			<th> <button> <a href="index.php?c=product&a=add">ADD</a> </button></th>
+		</tr>
+	</table>
+	<table class="table table-hover table-dark">
+		<tr>
+			<th>PRODUCT ID</th>
+			<th>PRODUCT NAME</th>
+			<th>COST</th>
+			<th>PRICE</th>
+			<th>SKU</th>
+			<th>STATUS</th>
+			<th>DISCRIPTION</th>
+			<th>COLOR</th>
+			<th>MATERIAL</th>
+			<th>CREATED AT</th>
+			<th>UPDATED AT</th>
+			<th>EDIT</th>
+			<th>DELETE</th>
+		</tr>
+	<?php foreach ($products as $product): ?>
+		<tr>
+			<td><?php echo $product['product_id']; ?></td>
+			<td><?php echo $product['name']; ?></td>
+			<td><?php echo $product['cost']; ?></td>
+			<td><?php echo $product['price']; ?></td>
+			<td><?php echo $product['sku']; ?></td>
+			<td><?php echo $product['status']; ?></td>
+			<td><?php echo $product['description']; ?></td>
+			<td><?php echo $product['color']; ?></td>
+			<td><?php echo $product['material']; ?></td>
+			<td><?php echo $product['created_at']; ?></td>
+			<td><?php echo $product['updated_at']; ?></td>
+			<td> <a href="index.php?c=product&a=edit&id=<?php echo $product['product_id']; ?>">EDIT</a> </td>
+			<td> <a href="index.php?c=product&a=delete&id=<?php echo $product['product_id']; ?>">DELETE</a> </td>
+		</tr>
+	<?php endforeach; ?>
+	</table>
+
+
+</body>
+</html>
