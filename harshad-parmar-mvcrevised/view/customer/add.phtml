@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>ADD</title>
+</head>
+<body>
+
+	<?php require 'view/html/header.phtml'; ?>
+	<table class="table">
+		<tr>
+			<th>customer Add</th>
+		</tr>
+	</table>
+	<form action="index.php?c=customer&a=save" method="POST">
+		<tr>
+			<th> <button> <a href="index.php?c=customer&a=grid">CANCEL</a> </button></th>
+			<th> <button type="submit"> SAVE </button></th>
+		</tr>
+		<table class="table table-success table-striped-columns">
+			<tr>
+				<td>FIRST NAME</td>
+				<td> <input type="text" name="customer[first_name]"> </td>
+			</tr>
+			<tr>
+				<td>LAST NAME</td>
+				<td> <input type="text" name="customer[last_name]"> </td>
+			</tr>
+			<tr>
+				<td>EMAIL</td>
+				<td> <input type="text" name="customer[email]"> </td>
+			</tr>
+			<tr>
+				<td>GENDER</td>
+				<td>
+					<select name="customer[gender]">
+						<option value="">SELECT GENDER</option>
+						<option>MALE</option>
+						<option>FEMALE</option>
+					</select>
+
+				</td>
+			</tr>
+			<tr>
+				<td>MOBILE</td>
+				<td> <input type="text" name="customer[mobile]"> </td>
+			</tr>
+			<tr]>
+				<td>STATUS</td>
+				<td>
+					<select name="customer[status]">
+						<option value="1">ACTIVE</option>
+						<option value="2">INACTIVE</option>
+					</select>
+
+				</td>
+			</tr>
+		</table>
+
+		<table class="table">
+		<tr>
+			<th>Customer Address</th>
+		</tr>
+	</table>
+		<table class="table">
+			<tr>
+				<td>BILLING ADDRESS</td>
+				<td> <input type="text" name="billingAddress[address]">  </td>
+			</tr>
+			<tr>
+				<td>CITY</td>
+				<td> <input type="text" name="billingAddress[city]" >  </td>
+			</tr>
+			<tr>
+				<td>STATE</td>
+				<td> <input type="text" name="billingAddress[state]" >  </td>
+			</tr>
+			<tr>
+				<td>COUNTRY</td>
+				<td> <input type="text" name="billingAddress[country]" >  </td>
+			</tr>
+			<tr>
+				<td>ZIP CODE</td>
+				<td> <input type="text" name="billingAddress[zip_code]" >  </td>
+			</tr>
+		</table>
+		<table class="table">
+			<tr>
+				<td>SHIPPING ADDRESS</td>
+				<td> <input type="text" name="shippingAddress[address]">  </td>
+			</tr>
+			<tr>
+				<td>CITY</td>
+				<td> <input type="text" name="shippingAddress[city]" >  </td>
+			</tr>
+			<tr>
+				<td>STATE</td>
+				<td> <input type="text" name="shippingAddress[state]" >  </td>
+			</tr>
+			<tr>
+				<td>COUNTRY</td>
+				<td> <input type="text" name="shippingAddress[country]" >  </td>
+			</tr>
+			<tr>
+				<td>ZIP CODE</td>
+				<td> <input type="text" name="shippingAddress[zip_code]" >  </td>
+			</tr>
+		</table>
+
+	</form>
+
+</body>
+</html>

@@ -1,0 +1,44 @@
+<?php
+require_once 'View/html/header.phtml';
+$categories = $this->getData();
+?>
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title> category</title>
+</head>
+<body>
+<table class="table">
+	<tr>
+		<th>Manage Category</th>
+		<th> <button> <a href="index.php?c=category&a=add">ADD</a> </button></th>
+	</tr>
+	</table>
+<table class="table table-success table-striped">
+	<tr>
+		<th>Category_id</th>
+		<th>Name</th>
+		<th>Description</th>
+		<th>Status</th>
+		<th>Created_at</th>
+		<th>Updated_at</th>
+		<th>Edit</th>
+		<th>Delete</th>
+	</tr>
+ 	<?php  foreach ($categories as $category): ?>
+ 	<tr>
+ 		<td><?php echo $category->category_id; ?></td>
+ 		<td><?php echo $category->name; ?></td>
+ 		<td><?php echo $category->description; ?></td>
+ 		<td><?php echo $category->status; ?></td>
+ 		<td><?php echo $category->created_at; ?></td>
+ 		<td><?php echo $category->updated_at; ?></td>
+ 		<td><a href="index.php?c=category&a=edit&id=<?php echo $category->category_id;?>">EDIT</a></td>
+ 		<td><a href="index.php?c=category&a=delete&id=<?php echo $category->category_id;?>">DELETE</a></td>
+ 	</tr>
+ 	<?php endforeach; ?>
+</table>
+</body>
+</html>
