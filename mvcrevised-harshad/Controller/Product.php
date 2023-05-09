@@ -5,74 +5,97 @@ class Controller_Product extends Controller_Core_Action
 	
 	public function gridAction()
 	{
-		$query = "SELECT * FROM `product`";
-
-		$adapter = $this->getAdapter();
-		$products = $adapter->fetchAll($query);
-		if (!$products) {
-			throw new Exception("products not found.", 1);
+		try {
+			$layout = $this->getLayout();
+			$grid = $layout->createBlock('Product_Grid');
+			$layout->getChild('content')->addChild('grid',$grid);
+			$layout->render();
+		} catch (Exception $e) {
+			
 		}
-		require_once 'view/product/grid.phtml';
 	}
 
 	public function addAction()
 	{
-		require_once 'view/product/add.phtml';
-	}
-
-	public function insertAction()
-	{
-			$request = $this->getRequest();
-			$productData = $request->getPost();
-
-			$query = "INSERT INTO `product`(`name`, `cost`, `SKU`, `price`, `quantity`, `description`, `status`, `color`, `material`) VALUES ('$productData[name]','$productData[cost]','$productData[SKU]','$productData[price]','$productData[quantity]','$productData[description]','$productData[status]','$productData[color]','$productData[material]')";
-
-			$adapter = new Model_Core_Adapter();
-			$result = $adapter->insert($query);
-			header("Location:index.php?c=product&a=grid");
+		$layout = $this->getLayout();
+		$product = Ccc::getModel('Product');
+    	$add = $layout->createBlock('Product_Edit')->setData(['product'=>$product]);
+		$layout->getChild('content')->addChild('add',$add);
+		$layout->render();
 	}
 
 	public function editAction()
 	{
-		$request = $this->getRequest();
-		$id = $request->getParams('id');
-		$query = "SELECT * FROM `product` WHERE `product_id`={$id}";
-		$adapter = $this->getAdapter();
-		$product = $adapter->fetchRow($query);
-		require_once 'view/product/edit.phtml';
+		try {
+			$productId = (int) Ccc::getModel('Core_Request')->getParams('id');
+			if (!$productId) {
+				throw new Exception("Invalid Id", 1);
+				
+			}
+			$layout = $this->getLayout();
+			$product = Ccc::getModel('Product')->load($productId);
+			if (!$product) {
+				throw new Exception("Invalid Id", 1);
+				
+			}
+			$edit = $layout->createBlock('Product_Edit')->setData(['product'=>$product]);
+
+			$layout->getChild('content')->addChild('edit',$edit);
+			$layout->render();
+		} catch (Exception $e) {
+			
+		}
 	}
 
-	public function updateAction()
+	public function saveAction()
 	{
-			$request = $this->getRequest();
-			$productData = $request->getPost();
+		try {
+			if (!$this->getRequest()->isPost()) {
+				throw new Exception("Invalid Request.", 1);
+			}
+			$postData = $this->getRequest()->getPost('product');
 
-			$id = $request->getParams('id');
-
-			$query = "UPDATE `product` SET 
-							`name`='$productData[name]',
-							`cost`='$productData[cost]',
-							`SKU`='$productData[SKU]',
-							`price`='$productData[price]',
-							`quantity`='$productData[quantity]',
-							`description`='$productData[description]',
-							`status`='$productData[status]',
-							`color`='$productData[color]',
-							`material`='$productData[material]' 
-							WHERE `product_id` = {$id}";
-			$adapter = $this->getAdapter();
-			$adapter->update($query);
-			header("Location:index.php?c=product&a=grid");
+			if ($id = $this->getRequest()->getParams('id')) {
+				$product = Ccc::getModel('Product')->load($id);
+				if (!$product) {
+					throw new Exception("Product not found.", 1);
+				}
+				$product->updated_at = date('Y-m-d H:i:s');
+			}
+			else{
+				$product = Ccc::getModel('product');
+				if (!$product) {
+					throw new Exception("Product not found", 1);
+				}
+				$product->created_at = date("Y-m-d H-i-s");
+			}
+			$product->setData($postData);
+			if (!$product->save()) {
+				throw new Exception("Product not saved.", 1);
+			}
+			$this->redirect('grid','product',null,true);
+		} catch (Exception $e) {
+				
+		}
 	}
+
 
 	public function deleteAction()
 	{
-		$request = $this->getRequest();
-		$id = $request->getParams('id');
-		$query = "DELETE FROM `product` WHERE `product_id` = {$id}";
-		$adapter = $this->getAdapter();
-		$adapter->update($query);
-		header("Location:index.php?c=Product&a=grid");
+		try {
+			if (!($id = (int)$this->getRequest()->getParams('id'))) {
+				throw new Exception("Id not found", 1);
+			}
+			$product = Ccc::getModel('Product')->load($id);
+			if (!$product) {
+				throw new Exception("Product not found", 1);
+			}
+			$product->delete();
+			
+		} catch (Exception $e) {
+			
+		}
+	$this->redirect('grid','product',null,true);
 	}
 
 }

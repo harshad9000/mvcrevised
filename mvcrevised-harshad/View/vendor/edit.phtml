@@ -13,14 +13,14 @@ $vendorAddress = $this->vendorAddress;
 </head>
 <body>
 
-	<?php require 'view/html/header.phtml'; ?>
-	<table class="table table-striped">
+
+	<table class="table table-success table-striped-columns">
 		<tr>
 			<th>Vendor Edit</th>
 		</tr>
 	</table>
 	<form action="index.php?c=vendor&a=save&id=<?php echo $vendor->vendor_id ?>" method="POST">
-		<table class="table table-striped">
+		<table class="table table-success table-striped-columns">
 			<tr>
 				<td>FIRST NAME</td>
 				<td> <input type="text" name="vendor[first_name]" value="<?php echo $vendor->first_name ?>">  </td>
@@ -51,18 +51,14 @@ $vendorAddress = $this->vendorAddress;
 			<tr>
 				<td>STATUS</td>
 				<td>
-					<select name="vendor[status]" value="<?php echo $vendor->status ?>"> 
-						<option>SELECT STATUS</option>
-						<option>ACTIVE</option>
-						<option>INACTIVE</option>
+					<select name="vendor[status]">
+						<?php foreach ($vendor->getResource()->getStatusOptions() as $key => $value):?>
+						<?php $selected = ($key == $vendor->getstatus()) ? 'selected' : '';?>
+						<option value="<?php echo $key ?>"<?php echo $selected; ?>><?php echo $value;?></option>
+						<?php endforeach;?>
 					</select>
 
 				</td>
-			</tr>
-			
-			<tr>
-				<td>COMPANY</td>
-				<td> <input type="text" name="vendor[company]" value="<?php echo $vendor->company ?>">  </td>
 			</tr>
 			<tr>
 				<th> <button> <a href="index.php?c=vendor&a=grid">CANCEL</a> </button></th>
@@ -89,7 +85,7 @@ $vendorAddress = $this->vendorAddress;
 				<td> <input type="text" name="address[state]" value="<?php echo $vendorAddress->state ?>">  </td>
 			</tr>
 			<tr>
-				<td>COMPANY</td>
+				<td>COUNTRY</td>
 				<td> <input type="text" name="address[country]" value="<?php echo $vendorAddress->country ?>">  </td>
 			</tr>
 			<tr>

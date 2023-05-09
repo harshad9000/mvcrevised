@@ -1,66 +1,125 @@
-<?php 
+<?php
 
-class Controller_Vendor extends Controller_Core_Action 
+class Controller_Vendor extends Controller_Core_Action
 {
 	public function gridAction()
 	{
-		$query = "SELECT * FROM `vendor`";
-		$adapter = $this->getAdapter();
-		$vendors = $adapter->fetchAll($query);
-		if (!$vendors) {
-			throw new Exception("products not found.", 1);
-		}
-		require_once 'view/vendor/grid.phtml';
+		try {
+			$layout = $this->getLayout();
+			$grid = $layout->createBlock('Vendor_Grid');
+			$layout->getChild('content')->addChild('grid',$grid);
+			$layout->render();
+		} catch (Exception $e) {
+	
+		}	
 	}
 
 	public function addAction()
 	{
-		require_once 'view/vendor/add.phtml';
-	}
-
-	public function insertAction()
-	{
-			$request = $this->getRequest();
-			$vendorData = $request->getPost();
-			$query = "INSERT INTO `vendor`(`name`, `address`) VALUES ('$vendorData[name]','$vendorData[address]')";
-			$adapter = new Model_Core_Adapter();
-			$result = $adapter->insert($query);
-			header("Location:index.php?c=vendor&a=grid");
+		$layout = $this->getLayout();
+		$vendor = Ccc::getModel('Vendor');
+		$address = Ccc::getModel('Vendor_Address');
+    	$add = $layout->createBlock('Vendor_Edit')->setData(['vendor'=>$vendor,'vendorAddress'=>$address]);
+		$layout->getChild('content')->addChild('add',$add);
+		$layout->render();
 	}
 
 	public function editAction()
 	{
-		$request = $this->getRequest();
-		$id = $request->getParams('id');
-		$query = "SELECT * FROM `vendor` WHERE `vendor_id`={$id}";
-		$adapter = $this->getAdapter();
-		$product = $adapter->fetchRow($query);
-		require_once 'view/vendor/edit.phtml';
+		// echo "hii";
+			// die();
+		try {
+			$vendorId = (int) Ccc::getModel('Core_Request')->getParams('id');
+			if (!$vendorId) {
+				throw new Exception("Invalid Id", 1);
+				
+			}
+			$layout = $this->getLayout();
+			$vendor = Ccc::getModel('Vendor')->load($vendorId);
+			if (!$vendor) {
+				throw new Exception("Invalid Id", 1);
+			}
+			$address = Ccc::getModel('Vendor_Address')->load($vendorId);
+			if (!$address) {
+				throw new Exception("Invalid Id", 1);
+			}
+			$edit = $layout->createBlock('Vendor_Edit')->setData(['vendor'=>$vendor,'vendorAddress' => $address]);
+
+			$layout->getChild('content')->addChild('edit',$edit);
+			$layout->render();
+		} catch (Exception $e) {
+			
+		}
 	}
 
-	public function updateAction()
+	public function saveAction()
 	{
-			$request = $this->getRequest();
-			$productData = $request->getPost();
-			$id = $request->getParams('id');
-			$query = "UPDATE `vendor` SET 
-							`name`='$vendorData[name]',
-							`address`='$vendorData[address]' 
-							WHERE `vendor_id` = {$id}";
-			$adapter = $this->getAdapter();
-			$adapter->update($query);
-			header("Location:index.php?c=vendor&a=grid");
+		try {
+
+			if (!$this->getRequest()->isPost()) {
+				throw new Exception("Invalid request.", 1);
+			}
+
+			$postData = $this->getRequest()->getPost('vendor');
+			if (!$postData) {
+				throw new Exception("Invalid data posted.", 1);
+			}
+		// 	echo "hii";
+		// die();
+			if ($id = (int)$this->getRequest()->getParams('id')) {
+				$vendor = Ccc::getModel('Vendor')->load($id);
+				if (!$vendor) {
+					throw new Exception("Invalid id.", 1);
+				}
+			$vendor->updated_at = date("Y-m-d H:i:s");
+			}
+			else{
+				$vendor = Ccc::getModel('Vendor');
+				$vendor->created_at = date("Y-m-d H:i:s");
+			}
+			$vendor->setData($postData);
+			if (!$vendor->save()) {
+				throw new Exception("Unable to save vendor.", 1);
+			}
+
+			$postDataAddress = $this->getRequest()->getpost('address');
+			if (!$postDataAddress) {
+				throw new Exception("Invalid data posted.", 1);
+			}
+			if ($id = (int)$this->getRequest()->getParams('id')) {
+				$vendorAddress = Ccc::getModel('Vendor_Address')->load($id);
+				if (!$vendorAddress) {
+					throw new Exception("Invalid id.", 1);
+				}
+			}
+			else{
+				$vendorAddress = Ccc::getModel('Vendor_Address');
+				$vendorAddress->vendor_id = $vendor->vendor_id;
+			}
+			$vendorAddress->setData($postDataAddress);
+			if (!$vendorAddress->save()) {
+				throw new Exception("Unable to save vendor.", 1);
+			}
+			$this->redirect('grid','vendor',null,true);
+		} catch (Exception $e) {
+			
+		}
 	}
 
 	public function deleteAction()
 	{
-		$request = $this->getRequest();
-		$id = $request->getParams('id');
-		$query = "DELETE FROM `vendor` WHERE `vendor_id` = {$id}";
-		$adapter = $this->getAdapter();
-		$adapter->update($query);
-		header("Location:index.php?c=vendor&a=grid");
-	}
+		if (!($id = (int) $this->getRequest()->getParams('id'))) {
+		throw new Exception("Error Processing Request", 1);
+		}
+		$vendor = Ccc::getModel('Vendor')->load($id);
 
+		if (!$vendor) {
+			throw new Exception("Error Processing Request", 1);
+		}
+		$vendorAddress = Ccc::getModel('Vendor_Address')->load($id);
+
+		$vendor->delete();
+		$vendorAddress->delete();
+		$this->redirect('grid','vendor',null,true);
+	}
 }
-?>

@@ -1,6 +1,6 @@
 <?php
 
-class Model_Product extends Model_Core_Table
+class Model_Category extends Model_Core_Table
 {
 	const STATUS_ACTIVE = 1;
     const STATUS_ACTIVE_LBL = 'Active';
@@ -13,7 +13,7 @@ class Model_Product extends Model_Core_Table
 		if ($this->status) {
 			return $this->status;
 		}
-		return Model_Product::STATUS_DEFAULT;
+		return Model_Category::STATUS_DEFAULT;
 	}
 
 	public function getStatusText($status)
@@ -22,14 +22,14 @@ class Model_Product extends Model_Core_Table
 		if (array_key_exists($this->status,$statuses)) {
 			return $statuses[$this->status];
 		}
-		return $statuses[Model_Product::STATUS_DEFAULT];
+		return $statuses[Model_Category::STATUS_DEFAULT];
 	}
 
 	public function __construct()
    {
       parent::__construct();
 
-      $this->setResourceClass('Model_Product_Resource');
-      $this->setCollectionClass('Model_Product_Collection');
+      $this->setResourceClass('Model_Category_Resource');
+      $this->setCollectionClass('Model_Category_Collection');
    }
 }

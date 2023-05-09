@@ -6,21 +6,22 @@ class Controller_Core_Action
    protected $request = null;
    protected $url = null;
    protected $view = null;
+   protected $layout = null;
 
    public function setAdapter($adapter)
    {
-   		$this->adapter = $adapter;
-   		return $this;
+         $this->adapter = $adapter;
+         return $this;
    }
 
    public function getAdapter()
    {
-   		if ($this->adapter) {
-   			return $this->adapter;
-   		}
-   		$adapter = new Model_Core_Adapter();
-   		$this->setAdapter($adapter);
-   		return $this->adapter;
+         if ($this->adapter) {
+            return $this->adapter;
+         }
+         $adapter = new Model_Core_Adapter();
+         $this->setAdapter($adapter);
+         return $this->adapter;
    }
 
    protected function setRequest(Model_Core_Request $request)
@@ -70,6 +71,22 @@ class Controller_Core_Action
       $this->setView($view);
       return $view;
    }
+
+   protected function setLayout(Block_Core_Layout $layout){
+      $this->layout = $layout;
+      return $this;
+   }
+
+   public function getLayout(){
+      if ($this->layout) {
+         return $this->layout;
+      }
+      $layout = new Block_Core_Layout();
+      $this->setLayout($layout);
+      return $layout;
+   }
+
+   
 
    public function redirect($action = null,$controller = null,$params = [],$reset = false)
    {

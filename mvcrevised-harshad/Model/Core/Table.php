@@ -1,120 +1,212 @@
 <?php
 
-class Model_Core_Table{
-
-	protected $tableName = null;
-	protected $primaryKey  = null;
-	protected $adapter = null;
+class Model_Core_Table
+{
+	protected $data = [];
+	protected $resource = null;
+	protected $collection = null;
+	protected $resourceClass = 'Model_Core_Resource_Resource';
+	protected $collectionClass = 'Model_Core_Resource_Collection';
 
 	function __construct()
 	{
-		
 	}
 
-	public function setTableName($tableName)
+	public function setId($id)
 	{
-		$this->tableName = $tableName;
+		$this->data[$this->getResource()->getPrinmaryKey()] = (int)$id;
 		return $this;
-	}
-	
-	public function getTableName()
-	{
-		return $this->tableName;
 	}
 
-	public function setPrimaryKey($primaryKey)
+	public function getId()
 	{
-		$this->primaryKey = $primaryKey;
+		$primaryKey = $this->getResource()->getPrimaryKey();
+		return (int)$this->$primaryKey;
+	}
+
+	public function setResourceClass($resourceClass)
+	{
+		$this->resourceClass = $resourceClass;
 		return $this;
+	}
+
+	public function getResourceClass()
+	{
+		if ($this->resourceClass) {
+			return $this->resourceClass;
+		}
+
+		$resourceClass = new ($this->resourceClass)();
+		$this->setResourceClass($resourceClass);
+		return $resourceClass;
+	}
+
+	public function setCollectionClass($collectionClass)
+	{
+		$this->collectionClass = $collectionClass;
+		return $this;
+	}
+
+	public function getCollectionClass()
+	{
+		if ($this->collectionClass) {
+			return $this->collectionClass;
+		}
+
+		$collectionClass = new ($this->collectionClass)();
+		$this->setCollectionClass($collectionClass);
+		return $collectionClass;
+	}
+
+	public function getResourceName()
+	{
+		return $this->getResource()->getResourceName();
 	}
 
 	public function getPrimaryKey()
 	{
-		return $this->primaryKey;
+		return $this->getResource()->getPrimaryKey();
 	}
 
-	protected function setAdapter($adapter)
+	public function setResource($resource)
 	{
-		$this->adapter = $adapter;
+		$this->resource = $resource;
 		return $this;
 	}
 
-	public function getAdapter()
+	public function getResource()
 	{
-		if ($this->adapter) {
-			return $this->adapter;
+		if ($this->resource) {
+			return $this->resource;
 		}
-		$adapter = new Model_Core_Adapter();
-		$this->setAdapter($adapter);
-		return $adapter;
+
+		$resource = new ($this->resourceClass)();
+		$this->setResource($resource);
+		return $resource;
+	}
+
+	public function __set($key,$value)
+	{
+		$this->data[$key] = $value;
+	}
+
+	public function __get($key)
+	{
+		if (array_key_exists($key, $this->data)) {
+			return $this->data[$key];
+		}
+		return null;
+	}
+
+	public function setData(array $data)
+	{
+		$this->data =array_merge($this->data,$data) ;
+		return $this;
+	}
+
+	public function getData($key=null)
+	{
+		if ($key == null) {
+			return $this->data;
+		}
+		if (array_key_exists($key, $this->data)) {
+			return $this->data[$key];
+		}
+		return null;
+	}
+
+	public function addData($key,$value)
+	{
+		$this->data[$key] = $value;
+		return $this;
+	}
+
+	public function removeData($key=null)
+	{
+		if ($key == null) {
+			$this->data = [];
+		}
+		if (array_key_exists($key,$this->data)) {
+			unset($this->data[$key]);
+		}
+		return $this;
 	}
 
 	public function fetchAll($query)
 	{
-		$result = $this->getAdapter()->fetchAll($query);
+		$result = $this->getResource()->fetchAll($query);
 		if (!$result) {
 			return false;
+		}
+
+		foreach ($result as &$row) {
+			$row = (new $this)->setData($row)->setResource($this->getResource());
 		}
 		return $result;
 	}
 
-	public function fetchRow($query){
-		if ($query) {
-		return $this->getAdapter()->fetchRow($query);	
+	public function fetchRow($query)
+	{
+		$result = $this->getResource()->fetchRow($query);
+		if ($result) {
+			$this->data = $result;
+			return $this;
+		}
+		return false;
+	}
+
+	public function delete()
+	{
+		$id = $this->getData($this->getPrimaryKey());
+		if (!$id) {
+			return false;
 		}
 
-		throw new Exception("Error Processing Request", 1);
+		$condition[$this->getPrimaryKey()] = $id;
+		$result = $this->getResource()->delete($condition);
+		if ($result) {
+			// $this->removeData();
+			return true;
+		}
+		return false;
+	}
+
+	public function load($id,$column = null)
+	{
+		if (!$column) {
+			$column = $this->getPrimaryKey();
+		}
+		$query = "SELECT * FROM `{$this->getResourceName()}` WHERE `{$column}` = {$id}";
+		// print_r($query);
+		// die();
+		$result = $this->getResource()->fetchRow($query);
+		if ($result) {
+			$this->data = $result;
+		}
+		return $this;
+	}
+
+	public function save()
+	{
+		if (!array_key_exists($this->getPrimaryKey(), $this->data)) {
+			$id = $this->getResource()->insert($this->data);
+			if ($id) {
+				$this->load($id);
+				return $this;
+			}
+			return false;
 		
-	}
+		}else{
+			$id = $this->getData($this->getPrimaryKey());
+			$condition[$this->getPrimaryKey()] = $id;
 
-	public function insert($data)
-	{
-		$keys = array_keys($data);
-		$values = array_values($data);
-		
-		$keyString = '`'.implode('`,`', $keys).'`';
-		$valueString = "'".implode("','", $values)."'";
-
-		$sql = "INSERT INTO `{$this->getTableName()}` ({$keyString}) VALUES ({$valueString})";
-
-		return $this->getAdapter()->insert($sql);
-	}
-
-	public function update($data, $conditions)
-	{
-		foreach ($data as $key => $value) {
-			$keys[] = "`$key`='$value'";
+			$result = $this->getResource()->update($this->data, $condition);
+			if($result){
+				$this->load($id);
+				return $this;
+			}
+			return false;		
 		}
-		$keyvaluestring = implode(',', $keys);
-
-		foreach ($conditions as $key => $value) {
-			$conditionArray[] = "`$key`='$value'";
-		}
-		$primaryKeyString = implode('AND', $conditionArray);
-		$sql = "UPDATE `{$this->getTableName()}` SET {$keyvaluestring} WHERE {$primaryKeyString}";
-		return $this->getAdapter()->update($sql);
-	}
-
-	public function delete($conditions)
-	{
-		foreach ($conditions as $key => $value)
-		{
-			$conditionArray[] = " `$key` = '$value'";
-		}
-
-		$keyString = implode('AND',$conditionArray);
-
-		$query = "DELETE FROM `{$this->getTableName()}` WHERE {$keyString}";
-		return $this->getAdapter()->delete($query);
-    }
-
-	public function load($value,$column=null)
-	{
-		$column = (!column) ? $this->getPrimaryKey() : $column;
-		$query = "SELECT * FROM `{$this->getTableName()}` WHERE `{$column}` = {$value}";
-		$row = $this->getAdapter()->fetchRow($query);
-		return $row;
 	}
 }
 
-?>

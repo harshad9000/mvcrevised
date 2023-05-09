@@ -18,7 +18,8 @@ class Controller_Core_Front
 		$this->setRequest($request);
 		return $request;
 	}
-	
+    
+
     public function init()
     {
        $request = $this->getRequest();
@@ -31,7 +32,7 @@ class Controller_Core_Front
 
        $controller = new $controllerClassName;
        $action = $request->getActionName()."Action";
-
+   
        if (!method_exists($controller,$action)) {
        		$controller->errorAction($action);
        }else{
